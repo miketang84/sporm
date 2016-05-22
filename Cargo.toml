@@ -1,0 +1,6 @@
+[package]
+name = "sporm"
+version = "0.1.0"
+authors = ["Daogang Tang <miketang84@outlook.com>"]
+
+[dependencies]
