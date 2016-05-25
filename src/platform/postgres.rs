@@ -13,7 +13,8 @@ use postgres::rows::Row;
 use database::SqlOption;
 use r2d2::PooledConnection;
 use r2d2_postgres::PostgresConnectionManager;
-use rustc_serialize::json::Json;
+// use rustc_serialize::json::Json;
+// use serde_json::Value as Json;
 use dao::Type;
 use postgres::types::IsNull;
 use uuid::Uuid;
@@ -75,15 +76,15 @@ impl Postgres {
                 Value::F64(ref x) => params.push(x),
                 Value::String(ref x) => params.push(x),
                 Value::VecU8(ref x) => params.push(x),
-                Value::Uuid(ref x) => params.push(x),
-                Value::DateTime(ref x) => params.push(x),
-                Value::NaiveDate(ref x) => params.push(x),
-                Value::NaiveTime(ref x) => params.push(x),
-                Value::NaiveDateTime(ref x) => params.push(x),
+                // Value::Uuid(ref x) => params.push(x),
+                // Value::DateTime(ref x) => params.push(x),
+                // Value::NaiveDate(ref x) => params.push(x),
+                // Value::NaiveTime(ref x) => params.push(x),
+                // Value::NaiveDateTime(ref x) => params.push(x),
                 Value::Json(ref x) => {
 //                    panic!("Json is not yet supported!..");
 //                     static NONE: &'static Option<String> = &None;
-                       params.push(x)
+                    //    params.push(x)
                 }
                 Value::None(ref v_type) => {
                         match v_type{
@@ -93,7 +94,7 @@ impl Postgres {
 							},
 							&Type::Uuid => {
 								static none: &'static Option<Uuid> = &None;
-								params.push(none)
+								// params.push(none)
 							}
 							_ => panic!("not yet for Non type of {:?}",v_type),
 						}
@@ -108,13 +109,13 @@ impl Postgres {
     /// convert a record of a row into rust type
     fn from_sql_to_rust_type(&self, dtype: &PgType, row: &Row, index: usize) -> Value {
         match *dtype {
-            PgType::Uuid => {
-                let value = row.get_opt(index);
-                match value {
-                    Ok(value) => Value::Uuid(value),
-                    Err(_) => Value::None(Type::Uuid),
-                }
-            }
+            // PgType::Uuid => {
+            //     let value = row.get_opt(index);
+            //     match value {
+            //         Ok(value) => Value::Uuid(value),
+            //         Err(_) => Value::None(Type::Uuid),
+            //     }
+            // }
             PgType::Varchar | PgType::Text | PgType::Bpchar => {
                 let value = row.get_opt(index);
                 match value {
@@ -122,13 +123,13 @@ impl Postgres {
                     Err(_) => Value::None(Type::String),
                 }
             }
-            PgType::TimestampTZ | PgType::Timestamp => {
-                let value = row.get_opt(index);
-                match value {
-                    Ok(value) => Value::DateTime(value),
-                    Err(_) => Value::None(Type::DateTime),
-                }
-            }
+            // PgType::TimestampTZ | PgType::Timestamp => {
+            //     let value = row.get_opt(index);
+            //     match value {
+            //         Ok(value) => Value::DateTime(value),
+            //         Err(_) => Value::None(Type::DateTime),
+            //     }
+            // }
             PgType::Float4 => {
                 let value = row.get_opt(index);
                 match value {
@@ -157,13 +158,13 @@ impl Postgres {
                     Err(_) => Value::None(Type::F64),
                 }
             }
-            PgType::Json => {
-                let value = row.get_opt(index);
-                match value {
-                    Ok(value) => Value::Json(value),
-                    Err(_) => Value::None(Type::F64),
-                }
-            }
+            // PgType::Json => {
+            //     let value = row.get_opt(index);
+            //     match value {
+            //         Ok(value) => Value::Json(value),
+            //         Err(_) => Value::None(Type::F64),
+            //     }
+            // }
             PgType::Int2 => {
                 let value = row.get_opt(index);
                 match value {
@@ -185,20 +186,20 @@ impl Postgres {
                     Err(_) => Value::None(Type::I64),
                 }
             }
-            PgType::Timetz => {
-                let value = row.get_opt(index);
-                match value {
-                    Ok(value) => Value::DateTime(value),
-                    Err(_) => Value::None(Type::DateTime),
-                }
-            }
-            PgType::Date => {
-                let value = row.get_opt(index);
-                match value {
-                    Ok(value) => Value::DateTime(value),
-                    Err(_) => Value::None(Type::DateTime),
-                }
-            }
+            // PgType::Timetz => {
+            //     let value = row.get_opt(index);
+            //     match value {
+            //         Ok(value) => Value::DateTime(value),
+            //         Err(_) => Value::None(Type::DateTime),
+            //     }
+            // }
+            // PgType::Date => {
+            //     let value = row.get_opt(index);
+            //     match value {
+            //         Ok(value) => Value::DateTime(value),
+            //         Err(_) => Value::None(Type::DateTime),
+            //     }
+            // }
             PgType::Bytea => {
                 let value = row.get_opt(index);
                 match value {

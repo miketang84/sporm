@@ -218,7 +218,7 @@ pub enum SqlType {
 
 #[derive(Clone)]
 #[derive(Debug)]
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Seriliaze, Deserialize)]
 pub struct ColumnName {
     pub column: String,
     pub table: Option<String>,
@@ -1101,13 +1101,13 @@ impl Query {
     }
 
     // attach and clause
-    pub fn and(&mut self, column: &str, equality: Equality, value: &ToValue) -> &mut Self {
+    pub fn cond_and(&mut self, column: &str, equality: Equality, value: &ToValue) -> &mut Self {
         self.filters.last_mut().unwrap().and(column, equality, value);
         self
     }
 
     // attach or clause
-    pub fn or(&mut self, column: &str, equality: Equality, value: &ToValue) -> &mut Self {
+    pub fn cond_or(&mut self, column: &str, equality: Equality, value: &ToValue) -> &mut Self {
         self.filters.last_mut().unwrap().or(column, equality, value);
         self
     }

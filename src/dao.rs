@@ -8,10 +8,14 @@ use chrono::offset::utc::UTC;
 use std::fmt;
 use query::ColumnName;
 use table::IsTable;
-use rustc_serialize::{Encodable, Encoder, Decodable, Decoder};
-use rustc_serialize::json::{self, ToJson, Json};
-use rustc_serialize::DecoderHelpers;
+// use rustc_serialize::{Encodable, Encoder};
+// use rustc_serialize::json::{self, ToJson, Json};
 
+use serde;
+use serde::{Serialize, Serializer};
+use serde_json;
+use serde_json::Value as Json;
+use serde_json::value::ToJson;
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -38,36 +42,37 @@ pub enum Type {
     NaiveDate,
     NaiveTime,
     NaiveDateTime,
-	None,
+    None,
 }
-impl Type{
-	/// get the string representation when used in rust code
-	pub fn to_str_repr(&self)->String{
-		match *self{
-			Type::Bool => "bool".to_owned(),
-			Type::I8 => "i8".to_owned(),
-			Type::I16 => "i16".to_owned(),
-			Type::I32 => "i32".to_owned(),
-			Type::I64 => "i64".to_owned(),
-			Type::U8 => "u8".to_owned(),
-			Type::U16 => "u16".to_owned(),
-			Type::U32 => "u32".to_owned(),
-			Type::U64 => "u64".to_owned(),
-			Type::F32 => "f32".to_owned(),
-			Type::F64 => "f64".to_owned(),
-			Type::String =>"String".to_owned(),
-			Type::VecU8 => "Vec<u8>".to_owned(),
-			Type::Object => "BTreeMap<String, Value>".to_owned(), 
-			Type::Json => "Json".to_owned(),
-			Type::Uuid => "Uuid".to_owned(),
-			Type::DateTime => "DateTime<UTC>".to_owned(),
-			Type::NaiveDate => "NaiveDate".to_owned(),
-			Type::NaiveTime => "NaiveTime".to_owned(),
-			Type::NaiveDateTime => "NaiveDateTime".to_owned(),
-			Type::None => "None".to_owned(),
 
-		}
-	}
+impl Type {
+    /// get the string representation when used in rust code
+    pub fn to_str_repr(&self) -> String {
+        match *self{
+            Type::Bool => "bool".to_owned(),
+            Type::I8 => "i8".to_owned(),
+            Type::I16 => "i16".to_owned(),
+            Type::I32 => "i32".to_owned(),
+            Type::I64 => "i64".to_owned(),
+            Type::U8 => "u8".to_owned(),
+            Type::U16 => "u16".to_owned(),
+            Type::U32 => "u32".to_owned(),
+            Type::U64 => "u64".to_owned(),
+            Type::F32 => "f32".to_owned(),
+            Type::F64 => "f64".to_owned(),
+            Type::String =>"String".to_owned(),
+            Type::VecU8 => "Vec<u8>".to_owned(),
+            Type::Object => "BTreeMap<String, Value>".to_owned(), 
+            Type::Json => "Json".to_owned(),
+            Type::Uuid => "Uuid".to_owned(),
+            Type::DateTime => "DateTime<UTC>".to_owned(),
+            Type::NaiveDate => "NaiveDate".to_owned(),
+            Type::NaiveTime => "NaiveTime".to_owned(),
+            Type::NaiveDateTime => "NaiveDateTime".to_owned(),
+            Type::None => "None".to_owned(),
+
+        }
+    }
 }
 
 
@@ -99,9 +104,8 @@ pub enum Value {
     None(Type),
 }
 
-impl Value{
-	
-	pub fn get_type(&self)->Type{
+impl Value {
+    pub fn get_type(&self) -> Type {
         match *self {
             Value::Bool(_) => Type::Bool,
             Value::I8(_) => Type::I8,
@@ -125,72 +129,73 @@ impl Value{
             Value::Json(_) => Type::Json,
             Value::None(_) => Type::None,
         }
-	}
+    }
 }
 
 
 /// custom implementation for value encoding to json,
 /// does not include unnecessary enum variants fields.
-impl Encodable for Value {
+impl Serialize for Value {
 
-    fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
+    fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
         match *self {
-            Value::Bool(ref x) => x.encode(s),
-            Value::I8(ref x) => x.encode(s),
-            Value::I16(ref x) => x.encode(s),
-            Value::I32(ref x) => x.encode(s),
-            Value::I64(ref x) => x.encode(s),
-            Value::U8(ref x) => x.encode(s),
-            Value::U16(ref x) => x.encode(s),
-            Value::U32(ref x) => x.encode(s),
-            Value::U64(ref x) => x.encode(s),
-            Value::F32(ref x) => x.encode(s),
-            Value::F64(ref x) => x.encode(s),
-            Value::String(ref x) => x.encode(s),
-            Value::VecU8(ref x) => x.encode(s),
-            Value::Uuid(ref x) => x.encode(s),
+            Value::Bool(ref x) => x.serialize(s),
+            Value::I8(ref x) => x.serialize(s),
+            Value::I16(ref x) => x.serialize(s),
+            Value::I32(ref x) => x.serialize(s),
+            Value::I64(ref x) => x.serialize(s),
+            Value::U8(ref x) => x.serialize(s),
+            Value::U16(ref x) => x.serialize(s),
+            Value::U32(ref x) => x.serialize(s),
+            Value::U64(ref x) => x.serialize(s),
+            Value::F32(ref x) => x.serialize(s),
+            Value::F64(ref x) => x.serialize(s),
+            Value::String(ref x) => x.serialize(s),
+            Value::VecU8(ref x) => x.serialize(s),
+            // Value::Uuid(ref x) => x.serialize(s),
             Value::DateTime(ref x) => {
-                x.to_rfc3339().encode(s)
+                x.to_rfc3339().serialize(s)
             }
-            Value::NaiveDate(ref x) => x.encode(s),
-            Value::NaiveTime(ref x) => x.encode(s),
-            Value::NaiveDateTime(ref x) => x.encode(s),
-            Value::Object(ref x) => x.encode(s),
-            Value::Json(ref x) => x.encode(s),
-            Value::None(_) => s.emit_nil(),
+            // Value::NaiveDate(ref x) => x.serialize(s),
+            // Value::NaiveTime(ref x) => x.serialize(s),
+            // Value::NaiveDateTime(ref x) => x.serialize(s),
+            Value::Object(ref x) => x.serialize(s),
+            Value::Json(ref x) => x.serialize(s),
+            // Value::None(_) => s.emit_nil(),
+            _ => "".serialize(s)
         }
     }
 }
 
-impl ToJson for Value {
+// impl ToJson for Value {
 
-    fn to_json(&self) -> Json {
-        match *self {
-            Value::Bool(ref x) => x.to_json(),
-            Value::I8(ref x) => x.to_json(),
-            Value::I16(ref x) => x.to_json(),
-            Value::I32(ref x) => x.to_json(),
-            Value::I64(ref x) => x.to_json(),
-            Value::U8(ref x) => x.to_json(),
-            Value::U16(ref x) => x.to_json(),
-            Value::U32(ref x) => x.to_json(),
-            Value::U64(ref x) => x.to_json(),
-            Value::F32(ref x) => x.to_json(),
-            Value::F64(ref x) => x.to_json(),
-            Value::String(ref x) => x.to_json(),
-            Value::VecU8(ref x) => x.to_json(),
-            Value::Uuid(ref x) => x.to_hyphenated_string().to_json(),
-            Value::DateTime(ref x) => x.to_rfc3339().to_json(),
-            //            Value::NaiveDate(ref x) => x.to_json(),
-            //            Value::NaiveTime(ref x) => x.to_json(),
-            //            Value::NaiveDateTime(ref x) => x.to_json(),
-            Value::Object(ref x) => x.to_json(),
-            Value::Json(ref x) => x.clone(),
-            Value::None(_) => Json::Null,
-            _ => panic!("unsupported/unexpected type! {:?}", self),
-        }
-    }
-}
+//     fn to_json(&self) -> Json {
+//         match *self {
+//             Value::Bool(ref x) => x.to_json(),
+//             Value::I8(ref x) => x.to_json(),
+//             Value::I16(ref x) => x.to_json(),
+//             Value::I32(ref x) => x.to_json(),
+//             Value::I64(ref x) => x.to_json(),
+//             Value::U8(ref x) => x.to_json(),
+//             Value::U16(ref x) => x.to_json(),
+//             Value::U32(ref x) => x.to_json(),
+//             Value::U64(ref x) => x.to_json(),
+//             Value::F32(ref x) => x.to_json(),
+//             Value::F64(ref x) => x.to_json(),
+//             Value::String(ref x) => x.to_json(),
+//             Value::VecU8(ref x) => x.to_json(),
+//             Value::Uuid(ref x) => x.to_hyphenated_string().to_json(),
+//             Value::DateTime(ref x) => x.to_rfc3339().to_json(),
+//             //            Value::NaiveDate(ref x) => x.to_json(),
+//             //            Value::NaiveTime(ref x) => x.to_json(),
+//             //            Value::NaiveDateTime(ref x) => x.to_json(),
+//             Value::Object(ref x) => x.to_json(),
+//             Value::Json(ref x) => x.clone(),
+//             Value::None(_) => Json::Null,
+//             _ => panic!("unsupported/unexpected type! {:?}", self),
+//         }
+//     }
+// }
 
 
 impl fmt::Display for Value {
@@ -272,7 +277,7 @@ pub struct DaoResult {
 /// a utility struct to hold only the needed fields from DaoResult that is needed
 /// in serializing the object, the non-significant ones are not included such as the renamed_columns
 /// TODO: add Decodable
-#[derive(RustcEncodable)]
+#[derive(Serialize)]
 pub struct SerDaoResult {
     pub dao: Vec<Dao>,
     pub total: Option<usize>,
@@ -292,10 +297,10 @@ impl SerDaoResult {
     }
 }
 
-impl Encodable for DaoResult {
-    fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-		let ser = SerDaoResult::from_dao_result(self);
-		ser.encode(s)
+impl Serialize for DaoResult {
+    fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        let ser = SerDaoResult::from_dao_result(self);
+        ser.serialize(s)
     }
 }
 
@@ -352,86 +357,90 @@ pub struct Dao {
 
 pub type ParseError = String;
 
-impl Dao{
-	pub fn from_str(s: &str)->Result<Vec<Self>, ParseError>{
-		println!("parsing multiple records from json");
-		let json: Json = Json::from_str(s).unwrap();
-		println!("from str json: {:#?}", json);
-		match json{
-			Json::Array(array) => {
-				let mut dao_list = vec![];
-				for obj in array{
-					let map = Self::json_object_to_btree(obj);
-					let dao = Dao{ values: map };
-					dao_list.push(dao);
-				}
-				Ok(dao_list)
-			},
-			_ => Err("Expecting an array".to_owned())
-		}
-	}
+impl Dao {
+    pub fn from_str(s: &str)->Result<Vec<Self>, ParseError>{
+        // println!("parsing multiple records from json");
+        let json: Json = serde_json::to_value(s);
+        // println!("from str json: {:#?}", json);
+        match json{
+            Json::Array(array) => {
+                let mut dao_list = vec![];
+                for obj in array{
+                    let map = Self::json_object_to_btree(obj);
+                    let dao = Dao{ values: map };
+                    dao_list.push(dao);
+                }
+                Ok(dao_list)
+            },
+            _ => Err("Expecting an array".to_owned())
+        }
+    }
 
-	fn json_object_to_btree(json: Json)->BTreeMap<String, Value>{
-		match json{
-			Json::Object(btree) => {
-				let mut new_map:BTreeMap<String, Value> = BTreeMap::new();
-				for (k, v) in btree.iter(){
-					let value = match v{
-						&Json::I64(v) => Value::I64(v),
-						&Json::U64(v) => Value::U64(v),
-						&Json::F64(v) => Value::F64(v),
-						&Json::String(ref v) => Value::String(v.to_owned()),
-						&Json::Boolean(v) => Value::Bool(v),
-						&Json::Null => Value::None(Type::Json),
-						&Json::Object(ref v) => {
-							let mut map: BTreeMap<String, Value> = BTreeMap::new();
-							for (k, v) in v.iter(){
-								let value = Value::Json(v.clone());
-								map.insert(k.to_owned(), value);
-							}
-							Value::Object(map)
-						},
-						&Json::Array(ref arr) => {
-							Value::Json(Json::Array(arr.clone()))
-						},
-					};
-					new_map.insert(k.to_owned(), value);
-				}
-				new_map
-			},
-			_ => panic!("expecting an object"),
-		}
-	}
-	/// reconstruct a dao from json string value
-	pub fn from_str_one(s: &str)->Result<Self, ()>{
-		let json: Json = Json::from_str(s).unwrap();
-		// then convert this map to Value
-		println!("from str: {:#?}", json);
-		let values = Self::json_object_to_btree(json);
-		Ok(Dao{
-			values: values
-		})
-	}
+    fn json_object_to_btree(json: Json)->BTreeMap<String, Value>{
+        match json{
+            Json::Object(btree) => {
+                let mut new_map:BTreeMap<String, Value> = BTreeMap::new();
+                for (k, v) in btree.iter(){
+                    let value = match v{
+                        &Json::I64(v) => Value::I64(v),
+                        &Json::U64(v) => Value::U64(v),
+                        &Json::F64(v) => Value::F64(v),
+                        &Json::String(ref v) => Value::String(v.to_owned()),
+                        &Json::Bool(v) => Value::Bool(v),
+                        &Json::Null => Value::None(Type::Json),
+                        &Json::Object(ref v) => {
+                            let mut map: BTreeMap<String, Value> = BTreeMap::new();
+                            for (k, v) in v.iter(){
+                                let value = Value::Json(v.clone());
+                                map.insert(k.to_owned(), value);
+                            }
+                            Value::Object(map)
+                        },
+                        &Json::Array(ref arr) => {
+                            Value::Json(Json::Array(arr.clone()))
+                        },
+                    };
+                    new_map.insert(k.to_owned(), value);
+                }
+                new_map
+            },
+            _ => panic!("expecting an object"),
+        }
+    }
+    
+    
+    /// reconstruct a dao from json string value
+    pub fn from_str_one(s: &str)->Result<Self, ()>{
+        let json: Json = serde_json::to_value(s);
+        // then convert this map to Value
+        // println!("from str: {:#?}", json);
+        let values = Self::json_object_to_btree(json);
+        Ok(Dao{
+            values: values
+        })
+    }
 }
 
 /// custom Encoder for Dao,
 /// decodes directly the content of `values`, instead of `values` as field of this `Dao` struct
-impl Encodable for Dao {
-    fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-        self.values.encode(s)
+impl Serialize for Dao {
+    fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        self.values.serialize(s)
     }
 }
-impl ToJson for Dao {
 
-    fn to_json(&self) -> Json {
-        let mut btree = BTreeMap::new();
-        for (key, value) in &self.values {
-            btree.insert(key.to_owned(), value.to_json());
-        }
-        Json::Object(btree)
-    }
+// impl ToJson for Dao {
 
-}
+//     fn to_json(&self) -> Json {
+//         let mut btree = BTreeMap::new();
+//         for (key, value) in &self.values {
+//             btree.insert(key.to_owned(), value.to_json());
+//         }
+//         // Json::Object(btree)
+//         serde_json::to_value(btree)
+//     }
+
+// }
 
 impl Dao {
 
@@ -444,7 +453,7 @@ impl Dao {
     }
 
     /// set to null the value of this column
-	/// TODO: correct the Null value here
+    /// TODO: correct the Null value here
     pub fn set_null(&mut self, column: &str) {
         self.set_value(column, Value::None(Type::String))
     }
@@ -638,18 +647,8 @@ impl ToValue for Json {
         Value::Json(self.clone())
     }
 }
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
+
+
 ///
 pub trait FromValue {
     fn from_type(ty: Value) -> Self;
