@@ -152,17 +152,17 @@ impl Serialize for Value {
             Value::F64(ref x) => x.serialize(s),
             Value::String(ref x) => x.serialize(s),
             Value::VecU8(ref x) => x.serialize(s),
-            // Value::Uuid(ref x) => x.serialize(s),
+            Value::Uuid(ref x) => x.serialize(s),
             Value::DateTime(ref x) => {
                 x.to_rfc3339().serialize(s)
             }
-            // Value::NaiveDate(ref x) => x.serialize(s),
-            // Value::NaiveTime(ref x) => x.serialize(s),
-            // Value::NaiveDateTime(ref x) => x.serialize(s),
+            Value::NaiveDate(ref x) => x.serialize(s),
+            Value::NaiveTime(ref x) => x.serialize(s),
+            Value::NaiveDateTime(ref x) => x.serialize(s),
             Value::Object(ref x) => x.serialize(s),
             Value::Json(ref x) => x.serialize(s),
-            // Value::None(_) => s.emit_nil(),
-            _ => "".serialize(s)
+            Value::None(_) => s.serialize_none(),
+            // _ => "".serialize(s)
         }
     }
 }

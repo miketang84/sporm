@@ -1,7 +1,8 @@
 use r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
 use r2d2::Config;
-use postgres::SslMode;
+// use postgres::SslMode;
+use r2d2_postgres::SslMode;
 use config::DbConfig;
 use database::{Database, DatabaseDDL, DatabaseDev};
 use platform::Postgres;
