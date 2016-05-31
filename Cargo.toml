@@ -28,13 +28,13 @@ features = ["serde"]
 version = "0.11"
 features = ["time", "uuid", "chrono", "serde_json"]
 
-[dependencies.serde_json]
+#[dependencies.serde_json]
 #git = "https://github.com/serde-rs/json.git"
-version = "0.7"
+#version = "0.7"
 
 [dependencies]
 serde = "0.7"
-#serde_json = "0.7"
+serde_json = "0.7"
 serde_macros = "0.7"
 uuid = { version = "0.2", features = ["serde", "v4"] }
 log = "0.3"
