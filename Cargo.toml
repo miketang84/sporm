@@ -16,7 +16,8 @@ keywords = ["orm", "database", "sql"]
 name = "sporm"
 
 [features]
-default = ["mysql"]
+#default = ["mysql"]
+default = []
 sqlite = ["rusqlite","r2d2_sqlite"]
 
 [dependencies.chrono]
